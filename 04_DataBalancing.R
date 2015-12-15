@@ -1,0 +1,5 @@
+rf <- randomForest(hypothyroid~.,data=dat_imp,importance=TRUE)
+order(importance(rf),decreasing = TRUE)
+library(rpart)
+dt <- rpart(hypothyroid~.,data=dat_imp)
+hist(log(dat$FTI))
