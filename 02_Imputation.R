@@ -95,7 +95,18 @@ table(dat_delete$hypothyroid)
 
 # 插補＋清洗
 write.csv(dat_imp_clean,"Data/Imputation/hypothyroid_imp.csv")
+
 # 直接刪除空值
 write.csv(dat_delete,"Data/Imputation/hypothyroid_delete.csv")
+
 # 只清洗數據
 write.csv(dat_clean,"Data/Imputation/hypothyroid_clean.csv")
+# 
+# names(dat_d)
+# num <- c("age","TSH","T3","TT4","T4U","FTI")
+# fac <- c("sex","on_thyroxine","query_on_thyroxine","on_antithyroid_medication","thyroid_surgery","query_TRUE","query_hyperthyroid",        
+#          "pregnant", "sick","tumor","lithium","goitre","TSH_measured","T3_measured","TT4_measured","T4U_measured","FTI_measured","TBG_measured")
+
+##
+summary(dat_d)
+
