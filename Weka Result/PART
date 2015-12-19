@@ -1,0 +1,112 @@
+=== Run information ===
+
+Scheme:weka.classifiers.rules.PART -M 2 -C 0.25 -Q 1
+Relation:     sds
+Instances:    3163
+Attributes:   26
+              hypothyroid
+              age
+              sex
+              on_thyroxine
+              query_on_thyroxine
+              on_antithyroid_medication
+              thyroid_surgery
+              query_TRUE
+              query_hyperthyroid
+              pregnant
+              sick
+              tumor
+              lithium
+              goitre
+              TSH_measured
+              TSH
+              T3_measured
+              T3
+              TT4_measured
+              TT4
+              T4U_measured
+              T4U
+              FTI_measured
+              FTI
+              TBG_measured
+              TBG
+Test mode:evaluate on training data
+
+=== Classifier model (full training set) ===
+
+PART decision list
+------------------
+
+FTI > 64 AND
+TSH <= 14.9: FALSE (2836.07/2.0)
+
+TSH_measured = y AND
+FTI <= 49 AND
+TSH > 5.9 AND
+on_antithyroid_medication = f AND
+query_TRUE = f: TRUE (101.0/2.0)
+
+TBG_measured = y: FALSE (28.69)
+
+FTI > 64 AND
+thyroid_surgery = f AND
+on_thyroxine = f AND
+query_TRUE = f AND
+TSH_measured = y AND
+query_hyperthyroid = f AND
+age <= 63: FALSE (24.0/0.67)
+
+goitre = f AND
+TSH <= 6: FALSE (57.78/2.34)
+
+FTI > 64 AND
+thyroid_surgery = f AND
+on_thyroxine = t: FALSE (21.41)
+
+FTI > 66 AND
+TSH > 17.4: FALSE (27.43/0.33)
+
+TSH_measured = y AND
+on_antithyroid_medication = f AND
+on_thyroxine = f AND
+T3_measured = y AND
+FTI > 17: TRUE (37.67/2.67)
+
+TSH_measured = y AND
+T3_measured = y AND
+T4U <= 1.23: FALSE (12.0/2.0)
+
+TSH_measured = y: TRUE (9.0)
+
+: FALSE (7.96/0.66)
+
+Number of Rules  : 	11
+
+
+Time taken to build model: 0.12 seconds
+
+=== Evaluation on training set ===
+=== Summary ===
+
+Correctly Classified Instances        3151               99.6206 %
+Incorrectly Classified Instances        12                0.3794 %
+Kappa statistic                          0.9577
+Mean absolute error                      0.0075
+Root mean squared error                  0.0604
+Relative absolute error                  8.2742 %
+Root relative squared error             28.3505 %
+Total Number of Instances             3163     
+
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.947     0.001      0.973     0.947     0.96       0.992    TRUE
+                 0.999     0.053      0.997     0.999     0.998      0.992    FALSE
+Weighted Avg.    0.996     0.051      0.996     0.996     0.996      0.992
+
+=== Confusion Matrix ===
+
+    a    b   <-- classified as
+  143    8 |    a = TRUE
+    4 3008 |    b = FALSE
+

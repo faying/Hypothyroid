@@ -1,0 +1,68 @@
+=== Run information ===
+
+Scheme:weka.classifiers.trees.RandomForest -I 100 -K 0 -S 1
+Relation:     sds
+Instances:    3163
+Attributes:   26
+              hypothyroid
+              age
+              sex
+              on_thyroxine
+              query_on_thyroxine
+              on_antithyroid_medication
+              thyroid_surgery
+              query_TRUE
+              query_hyperthyroid
+              pregnant
+              sick
+              tumor
+              lithium
+              goitre
+              TSH_measured
+              TSH
+              T3_measured
+              T3
+              TT4_measured
+              TT4
+              T4U_measured
+              T4U
+              FTI_measured
+              FTI
+              TBG_measured
+              TBG
+Test mode:evaluate on training data
+
+=== Classifier model (full training set) ===
+
+Random forest of 100 trees, each constructed while considering 5 random features.
+Out of bag error: 0.0101
+
+
+
+Time taken to build model: 0.62 seconds
+
+=== Evaluation on training set ===
+=== Summary ===
+
+Correctly Classified Instances        3161               99.9368 %
+Incorrectly Classified Instances         2                0.0632 %
+Kappa statistic                          0.993 
+Mean absolute error                      0.0073
+Root mean squared error                  0.038 
+Relative absolute error                  7.9929 %
+Root relative squared error             17.8209 %
+Total Number of Instances             3163     
+
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.993     0          0.993     0.993     0.993      1        TRUE
+                 1         0.007      1         1         1          1        FALSE
+Weighted Avg.    0.999     0.006      0.999     0.999     0.999      1    
+
+=== Confusion Matrix ===
+
+    a    b   <-- classified as
+  150    1 |    a = TRUE
+    1 3011 |    b = FALSE
+

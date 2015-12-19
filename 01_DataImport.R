@@ -64,11 +64,17 @@ marginmatrix(dat[,c("hypothyroid","TBG","FTI","T4U","TT4","T3","TSH","age")])
 pbox(dat, pos=2)
 
 
+
+
+
 ####Data Cleaning
 library(dplyr)
+
+###
 # 刪除沒有一個有效化驗值的樣本（3163->3162）
 tmp <- filter(dat,!((dat$TSH<=0 | is.na(dat$TSH)) & (dat$T3<=0 | is.na(dat$T3)) & (dat$TT4<=0 | is.na(dat$TT4)) & 
                       (dat$T4U<=0 | is.na(dat$T4U)) & (dat$FTI<=0 | is.na(dat$FTI)) & (dat$TBG<=0 | is.na(dat$TBG))))
+##刪除測量值為空的樣本 不符合常理的觀測值
 # 刪除測量T3但是值不大於0或為空的樣本(3162->3161)
 tmp <- filter(tmp,!(tmp$T3_measured==1 & (tmp$T3<=0 | is.na(tmp$T3))))
 # 刪除測量T4U但是值不大於0或為空的樣本(3161->3159)
@@ -77,6 +83,7 @@ tmp <- filter(tmp,!(tmp$T4U_measured==1 & (tmp$T4U<=0 | is.na(tmp$T4U))))
 tmp <- filter(tmp,!(tmp$FTI_measured==1 & (tmp$FTI<=0 | is.na(tmp$FTI))))
 # 刪除測量TSH但是值不大於0或為空的樣本(3151->2258)
 tmp <- filter(tmp,!(tmp$TSH_measured==1 & (tmp$TSH<=0 | is.na(tmp$TSH))))
+
 
 table(dat$hypothyroid)
 # 0    1 
@@ -88,23 +95,19 @@ table(tmp$hypothyroid)
 # 刪除TBG測量值
 dat <- select(tmp,-TBG)
 rm(tmp)
-
-dc <- function(x){
-  require(dplyr,quietly = TRUE)
-  # 刪除沒有一個有效化驗值的樣本（3163->3162）
-  tmp <- filter(x,!(is.na(x$TSH) & is.na(x$T3) & is.na(x$TT4) & 
-                    is.na(x$T4U) & is.na(x$FTI)))
-  # 刪除T3值不大於0或為空的樣本(3162->3161)
-  tmp <- filter(tmp,!tmp$T3<=0)
-  # 刪TT4值不大於0或為空的樣本(3161->3159)
-  tmp <- filter(tmp,!tmp$TT4<=0)
-  # 刪除T4U值不大於0或為空的樣本(3161->3159)
-  tmp <- filter(tmp,!tmp$T4U<=0)
-  # 刪除測量FTI但是值不大於0或為空的樣本(3159->3151)
-  tmp <- filter(tmp,!tmp$FTI<=0)
-  # 刪除TSH值不大於0或為空的樣本(3151->2258)
-  tmp <- filter(tmp,!tmp$TSH<=0)
-  # 刪除TSH值不大於0或為空的樣本(3151->2258)
-  tmp <- filter(tmp,!tmp$age<=0)
-}
 dat_clean <- dat
+
+####剔除"TSH_measured","T3_measured","TT4_measured","T4U_measured","FTI_measured" 超過三個為空的樣本（不利插補）
+table(dat[,c("hypothyroid","TSH_measured","T3_measured","TT4_measured","T4U_measured","FTI_measured")])
+# T3_measured = 0, TT4_measured = 0, T4U_measured = 0, FTI_measured = 0 TSH_measured = 0 (2258->2013)
+tmp <- filter(dat,!(T3_measured == 0 & TT4_measured == 0 & T4U_measured == 0 & FTI_measured == 0 & TSH_measured == 0))
+# T3_measured = 0, TT4_measured = 0, T4U_measured = 0  TSH_measured＝0 (2013->2012)
+tmp <- filter(tmp,!(T3_measured == 0 & TT4_measured == 0 & T4U_measured == 0  & TSH_measured==0))
+# T3_measured = 0, TT4_measured = 0  TSH_measured (2012->2011)
+tmp <- filter(tmp,!(T3_measured == 0 & TT4_measured == 0 & TSH_measured==0))
+
+dat <- tmp
+table(dat$hypothyroid)
+# 0    1 
+# 1867  144 
+rm(tmp)

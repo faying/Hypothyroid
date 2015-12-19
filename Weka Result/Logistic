@@ -1,0 +1,127 @@
+=== Run information ===
+
+Scheme:weka.classifiers.functions.Logistic -R 1.0E-8 -M -1
+Relation:     sds
+Instances:    3163
+Attributes:   26
+              hypothyroid
+              age
+              sex
+              on_thyroxine
+              query_on_thyroxine
+              on_antithyroid_medication
+              thyroid_surgery
+              query_TRUE
+              query_hyperthyroid
+              pregnant
+              sick
+              tumor
+              lithium
+              goitre
+              TSH_measured
+              TSH
+              T3_measured
+              T3
+              TT4_measured
+              TT4
+              T4U_measured
+              T4U
+              FTI_measured
+              FTI
+              TBG_measured
+              TBG
+Test mode:evaluate on training data
+
+=== Classifier model (full training set) ===
+
+Logistic Regression with ridge parameter of 1.0E-8
+Coefficients...
+                                Class
+Variable                         TRUE
+=====================================
+age                            0.0174
+sex                            0.1281
+on_thyroxine                  -0.4358
+query_on_thyroxine           -61.0708
+on_antithyroid_medication     -2.4597
+thyroid_surgery                1.0552
+query_TRUE                     0.1743
+query_hyperthyroid             0.1152
+pregnant                      -2.5142
+sick                           -0.561
+tumor                        -73.3838
+lithium                      -11.4692
+goitre                         1.0368
+TSH_measured                  -3.3385
+TSH                            0.0298
+T3_measured                    0.3144
+T3                             0.2926
+TT4_measured                  -4.9011
+TT4                            0.0258
+T4U_measured                  -4.8739
+T4U                           -1.8225
+FTI_measured                  -5.0936
+FTI                           -0.1298
+TBG_measured                   0.0921
+TBG                            0.0655
+Intercept                      2.6258
+
+
+Odds Ratios...
+                                Class
+Variable                         TRUE
+=====================================
+age                            1.0175
+sex                            1.1367
+on_thyroxine                   0.6468
+query_on_thyroxine                  0
+on_antithyroid_medication      0.0855
+thyroid_surgery                2.8724
+query_TRUE                     1.1904
+query_hyperthyroid             1.1221
+pregnant                       0.0809
+sick                           0.5706
+tumor                               0
+lithium                             0
+goitre                         2.8201
+TSH_measured                   0.0355
+TSH                            1.0303
+T3_measured                    1.3694
+T3                             1.3399
+TT4_measured                   0.0074
+TT4                            1.0261
+T4U_measured                   0.0076
+T4U                            0.1616
+FTI_measured                   0.0061
+FTI                            0.8782
+TBG_measured                   1.0965
+TBG                            1.0677
+
+
+Time taken to build model: 0.15 seconds
+
+=== Evaluation on training set ===
+=== Summary ===
+
+Correctly Classified Instances        3115               98.4825 %
+Incorrectly Classified Instances        48                1.5175 %
+Kappa statistic                          0.8207
+Mean absolute error                      0.0255
+Root mean squared error                  0.1109
+Relative absolute error                 27.9739 %
+Root relative squared error             52.0294 %
+Total Number of Instances             3163     
+
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.768     0.004      0.899     0.768     0.829      0.991    TRUE
+                 0.996     0.232      0.988     0.996     0.992      0.991    FALSE
+Weighted Avg.    0.985     0.221      0.984     0.985     0.984      0.991
+
+=== Confusion Matrix ===
+
+    a    b   <-- classified as
+  116   35 |    a = TRUE
+   13 2999 |    b = FALSE
+
