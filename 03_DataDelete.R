@@ -28,13 +28,13 @@ library(glmnet)
 library(randomForest)
 library(ROCR)
 ####Cross Validation_1#######################################
-
+###修改群組1──5 實現5折交叉驗證
 grp <- sample(1:5,nrow(dat_d),replace = TRUE)
 dat_dg <- cbind(dat_d,grp)
 dat_dg1 <- cbind(dat_d1,grp)
-train <- select(filter(dat_dg,grp!=1),-grp)
-train1 <- select(filter(dat_dg1,grp!=1),-grp)
-test <- select(filter(dat_dg,grp==1),-grp)
+train <- select(filter(dat_dg,grp!=5),-grp)
+train1 <- select(filter(dat_dg1,grp!=5),-grp)
+test <- select(filter(dat_dg,grp==5),-grp)
 # test1 <- select(filter(dat_dg1,grp==1),-grp)
 
 ####對訓練集採用不同平衡方法
