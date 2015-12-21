@@ -93,9 +93,11 @@ table(tmp$hypothyroid)
 # 2114  144 
 
 # 刪除TBG測量值
-dat <- select(tmp,-TBG)
-rm(tmp)
-dat_clean <- dat
+# dat <- select(tmp,-TBG)
+# rm(tmp)
+# dat_clean <- dat
+dat_clean <- tmp
+
 
 ####剔除"TSH_measured","T3_measured","TT4_measured","T4U_measured","FTI_measured" 超過三個為空的樣本（不利插補）
 table(dat[,c("hypothyroid","TSH_measured","T3_measured","TT4_measured","T4U_measured","FTI_measured")])
@@ -111,3 +113,4 @@ table(dat$hypothyroid)
 # 0    1 
 # 1867  144 
 rm(tmp)
+table(dat_orginal$hypothyroid)

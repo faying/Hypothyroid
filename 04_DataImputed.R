@@ -1,14 +1,13 @@
 ##################################dat_delete####################################################################
 source(file="pcme.R")
-#### dat_delete
-dat_d <- dat_delete
-rm(dat_delete)
-dat_d1 <- select(read.csv("Data/Imputation/hypothyroid_delete.csv",header = T),-X)
-dat_d <- select(dat_d,-TSH_measured,-T3_measured,-TT4_measured,-T4U_measured,-FTI_measured)
-dat_d1 <- select(dat_d1,-TSH_measured,-T3_measured,-TT4_measured,-T4U_measured,-FTI_measured)
-library(corrplot)
-corrplot(cor(dat_d1[,-1]),order="hclust",method="color",outline = T)
-
+####dat_imp_clean
+dat_ic <- dat_imp_clean
+dat_ic1 <- select(read.csv("Data/Imputation/hypothyroid_imp.csv",header = T),-X)
+summary(dat_ic)
+dat_ic <- select(dat_ic,-TT4_measured,-T4U_measured,-FTI_measured)
+dat_ic1 <- select(dat_ic1,-TT4_measured,-T4U_measured,-FTI_measured)
+corrplot(cor(dat_ic1[,-1]),order="hclust",method="color",outline = T)
+round(prop.table(table(dat_ic$hypothyroid)),4) #7.87%
 ######Logistic 非平衡數據敏感性分析
 #Imbalanced
 #Random Over-Sampling(ROS)
@@ -24,12 +23,12 @@ library(randomForest)
 library(ROCR)
 ####Cross Validation_1#######################################
 ###修改群組1──5 實現5折交叉驗證
-grp <- sample(1:5,nrow(dat_d),replace = TRUE)
-dat_dg <- cbind(dat_d,grp)
-dat_dg1 <- cbind(dat_d1,grp)
-train <- select(filter(dat_dg,grp!=5),-grp)
-train1 <- select(filter(dat_dg1,grp!=5),-grp)
-test <- select(filter(dat_dg,grp==5),-grp)
+grp_ic <- sample(1:5,nrow(dat_ic),replace = TRUE)
+dat_icg <- cbind(dat_ic,grp_ic)
+dat_icg1 <- cbind(dat_ic1,grp_ic)
+train <- select(filter(dat_icg,grp_ic!=5),-grp_ic)
+train1 <- select(filter(dat_icg1,grp_ic!=5),-grp_ic)
+test <- select(filter(dat_icg,grp_ic==5),-grp_ic)
 # test1 <- select(filter(dat_dg1,grp==1),-grp)
 
 ####對訓練集採用不同平衡方法
@@ -73,19 +72,19 @@ best_cut_orgi_rf <- pd_orgi_rf[which.max(pd_orgi_rf$tpr-pd_orgi_rf$fpr+1),]
 
 
 ###ROS##########################################################################################
-dat_dg_train_ros <- ROSE(hypothyroid~.,data = train)$data
-dat_dg_train_ros1 <- ROSE(hypothyroid~.,data = train1)$data
-table(dat_dg_train_ros$hypothyroid)
+dat_icg_train_ros <- ROSE(hypothyroid~.,data = train)$data
+dat_icg_train_ros1 <- ROSE(hypothyroid~.,data = train1)$data
+table(dat_icg_train_ros$hypothyroid)
 ##Train
 #Lasso
-mid_model <- cv.glmnet(as.matrix(select(dat_dg_train_ros1,-hypothyroid)),as.factor(dat_dg_train_ros1$hypothyroid),family="binomial",type.measure="deviance")
+mid_model <- cv.glmnet(as.matrix(select(dat_icg_train_ros1,-hypothyroid)),as.factor(dat_icg_train_ros1$hypothyroid),family="binomial",type.measure="deviance")
 # plot(mid_model)
 lasso_ros <- coef(mid_model, s = "lambda.min")
 (newvar <- row.names(lasso_ros)[as.numeric(lasso_ros)>0][-1])
-glm_ros <- glm(hypothyroid~.,data = dat_dg_train_ros[,c("hypothyroid",newvar)],family=binomial(link="logit"))
+glm_ros <- glm(hypothyroid~.,data = dat_icg_train_ros[,c("hypothyroid",newvar)],family=binomial(link="logit"))
 summary(glm_ros)$coefficients[,-3]
 #RF
-rf_ros <- randomForest(hypothyroid ~ .,data=dat_dg_train_ros, importance=TRUE, ntree = 500)
+rf_ros <- randomForest(hypothyroid ~ .,data=dat_icg_train_ros, importance=TRUE, ntree = 500)
 rn <- round(importance(rf_ros), 2)
 rn[order(rn[,3], decreasing=TRUE),]
 row.names(rn[order(rn[,3], decreasing=TRUE),])[1:10]
@@ -114,19 +113,19 @@ best_cut_ros_rf <- pd_ros_rf[which.max(pd_ros_rf$tpr-pd_ros_rf$fpr+1),]
 (resu_ros_rf <- cbind(au_ros_rf,best_cut_ros_rf))
 
 ###RUS##########################################################################################
-dat_dg_train_rus <- ovun.sample(hypothyroid~.,data = train,method = "under")$data
-dat_dg_train_rus1 <- ovun.sample(hypothyroid~.,data = train1,method = "under")$data
-table(dat_dg_train_rus$hypothyroid)
+dat_icg_train_rus <- ovun.sample(hypothyroid~.,data = train,method = "under")$data
+dat_icg_train_rus1 <- ovun.sample(hypothyroid~.,data = train1,method = "under")$data
+table(dat_icg_train_rus$hypothyroid)
 ##Train
 #Lasso
-mid_model <- cv.glmnet(as.matrix(select(dat_dg_train_rus1,-hypothyroid)),as.factor(dat_dg_train_rus1$hypothyroid),family="binomial",type.measure="deviance")
+mid_model <- cv.glmnet(as.matrix(select(dat_icg_train_rus1,-hypothyroid)),as.factor(dat_icg_train_rus1$hypothyroid),family="binomial",type.measure="deviance")
 # plot(mid_model)
 lasso_rus <- coef(mid_model, s = "lambda.min")
 (newvar <- row.names(lasso_rus)[as.numeric(lasso_rus)>0][-1])
-glm_rus <- glm(hypothyroid~.,data = dat_dg_train_rus[,c("hypothyroid",newvar)],family=binomial(link="logit"))
+glm_rus <- glm(hypothyroid~.,data = dat_icg_train_rus[,c("hypothyroid",newvar)],family=binomial(link="logit"))
 summary(glm_rus)$coefficients[,-3]
 #RF
-rf_rus <- randomForest(hypothyroid~ .,data=dat_dg_train_rus, importance=TRUE, ntree = 500)
+rf_rus <- randomForest(hypothyroid~ .,data=dat_icg_train_rus, importance=TRUE, ntree = 500)
 rn <- round(importance(rf_rus), 2)
 rn[order(rn[,3], decreasing=TRUE),]
 row.names(rn[order(rn[,3], decreasing=TRUE),])[1:10]
@@ -156,21 +155,21 @@ best_cut_rus_rf <- pd_rus_rf[which.max(pd_rus_rf$tpr-pd_rus_rf$fpr+1),]
 
 
 ###SMOTE##########################################################################################
-dat_dg_train_smote <- SMOTE(hypothyroid~.,data = train)
+dat_icg_train_smote <- SMOTE(hypothyroid~.,data = train)
 train2 <- train1
 train2$hypothyroid <- as.factor(train2$hypothyroid)
-dat_dg_train_smote1 <- SMOTE(hypothyroid~.,data = train2)
-table(dat_dg_train_smote$hypothyroid)
+dat_icg_train_smote1 <- SMOTE(hypothyroid~.,data = train2)
+table(dat_icg_train_smote$hypothyroid)
 ##Train
 #Lasso
-mid_model <- cv.glmnet(as.matrix(select(dat_dg_train_smote1,-hypothyroid)),as.factor(dat_dg_train_smote1$hypothyroid),family="binomial",type.measure="deviance")
+mid_model <- cv.glmnet(as.matrix(select(dat_icg_train_smote1,-hypothyroid)),as.factor(dat_icg_train_smote1$hypothyroid),family="binomial",type.measure="deviance")
 # plot(mid_model)
 lasso_smote <- coef(mid_model, s = "lambda.min")
 (newvar <- row.names(lasso_smote)[as.numeric(lasso_smote)>0][-1])
-glm_smote <- glm(hypothyroid~.,data = dat_dg_train_smote[,c("hypothyroid",newvar)],family=binomial(link="logit"))
+glm_smote <- glm(hypothyroid~.,data = dat_icg_train_smote[,c("hypothyroid",newvar)],family=binomial(link="logit"))
 summary(glm_smote)$coefficients[,-3]
 #RF
-rf_smote <- randomForest(hypothyroid~ .,data=dat_dg_train_smote, importance=TRUE, ntree = 500)
+rf_smote <- randomForest(hypothyroid~ .,data=dat_icg_train_smote, importance=TRUE, ntree = 500)
 rn <- round(importance(rf_smote), 2)
 rn[order(rn[,3], decreasing=TRUE),]
 row.names(rn[order(rn[,3], decreasing=TRUE),])[1:10]

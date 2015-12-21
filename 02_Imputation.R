@@ -109,4 +109,5 @@ write.csv(dat_clean,"Data/Imputation/hypothyroid_clean.csv")
 
 ##
 summary(dat_d)
+table(dat_d$hypothyroid)
 
