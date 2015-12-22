@@ -19,43 +19,76 @@ dat$T4U_measured <- factor(dat$T4U_measured)
 dat$FTI_measured <- factor(dat$FTI_measured)
 dat$TBG_measured <- factor(dat$TBG_measured)
 
-####Data Summary
-library(Hmisc)
-summary(dat)
-describe(dat)
 
-####Finding Missing Data
-library(mice)
-md.pattern(dat)
-# md.pairs(dat)
-flux(dat)
-fluxplot(dat)
-barMiss(dat[,c("hypothyroid","TBG")]) 
-barMiss(dat[,c("hypothyroid","FTI")]) 
-barMiss(dat[,c("hypothyroid","T4U")]) 
-barMiss(dat[,c("hypothyroid","TT4")]) 
-barMiss(dat[,c("hypothyroid","T3")]) 
-barMiss(dat[,c("hypothyroid","TSH")]) 
-barMiss(dat[,c("hypothyroid","age")]) 
-
-histMiss(dat[,c("age","TBG")])
-histMiss(dat[,c("age","FTI")])
-histMiss(dat[,c("age","T4U")])
-histMiss(dat[,c("age","TT4")])
-histMiss(dat[,c("age","T3")])
-histMiss(dat[,c("age","TSH")])
 
 # names(dat)
 library(VIM)
-aggr_plot <- aggr(dat, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE, labels=names(data), 
-                  cex.axis=.7, gap=3, ylab=c("Histogram of missing data","Pattern"))
-marginplot(dat[,c("hypothyroid","TBG")])
-marginplot(dat[,c("hypothyroid","FTI")])
-marginplot(dat[,c("hypothyroid","T4U")])
-marginplot(dat[,c("hypothyroid","TT4")])
-marginplot(dat[,c("hypothyroid","T3")])
-marginplot(dat[,c("hypothyroid","TSH")])
-marginplot(dat[,c("hypothyroid","age")])
-matrixplot(dat)  
 marginmatrix(dat[,c("hypothyroid","TBG","FTI","T4U","TT4","T3","TSH","age")])
-pbox(dat, pos=2)
+
+summary(dat)
+library(missForest)
+imp <- missForest(dat)
+imp$OOBerror
+dat_imp <- imp$ximp
+write.csv(dat_imp,"Data/hypothyroid_rfimp.csv")
+
+
+library(randomForest)
+library(ROSE)
+library(ROCR)
+library(DMwR)
+
+tt <- sample(2,nrow(dat_imp),replace=TRUE,prob=c(0.7,0.3))
+rf <- randomForest(hypothyroid ~.,dat_imp[tt==1,],ntree=500,nPerm=10,mtry=3,proximity=TRUE,importance=TRUE,classwt=c(0.05,0.95))
+rf.pred <- predict(rf,dat_imp[tt==1,])
+table(observed=dat_imp[tt==1,"hypothyroid"],predicted=rf.pred)
+rf.pred1 <- predict(rf,dat_imp[tt==2,])
+table(observed=dat_imp[tt==2,"hypothyroid"],predicted=rf.pred1)
+
+
+dat_imp_rus <- ovun.sample(hypothyroid~.,data =dat_imp[tt==1,],method = "under")$data
+
+rf <- randomForest(hypothyroid ~.,dat_imp_rus,ntree=500,nPerm=10,mtry=3,proximity=TRUE,importance=TRUE)
+rf.pred <- predict(rf,dat_imp_rus)
+table(observed=dat_imp_rus[,"hypothyroid"],predicted=rf.pred)
+rf.pred1 <- predict(rf,dat_imp[tt==2,])
+table(observed=dat_imp[tt==2,"hypothyroid"],predicted=rf.pred1)
+
+dat_imp_smote <- SMOTE(hypothyroid~.,data = dat_imp[tt==1,])
+rf <- randomForest(hypothyroid ~.,dat_imp_smote,ntree=500,nPerm=10,mtry=3,proximity=TRUE,importance=TRUE)
+rf.pred <- predict(rf,dat_imp_smote)
+table(observed=dat_imp_smote[,"hypothyroid"],predicted=rf.pred)
+rf.pred1 <- predict(rf,dat_imp[tt==2,])
+table(observed=dat_imp[tt==2,"hypothyroid"],predicted=rf.pred1)
+
+
+
+
+
+require(randomForest, quietly=TRUE)
+library(doMC)
+library(foreach)
+core <- detectCores()
+registerDoMC(core)
+rf <- foreach(ntree=rep(ceiling(500/core), core), .combine=combine, .packages='randomForest') %dopar%
+  randomForest(hypothyroid ~ .,data=dat_imp[tt==1,], importance=TRUE, na.action=na.roughfix, ntree=ntree)
+rn <- round(importance(dats$rf), 2)
+rn[order(rn[,3], decreasing=TRUE),]
+
+
+
+# rf1 <- randomForest(hypothyroid ~.,dat[tt==1,-24],ntree=500,nPerm=10,mtry=3,proximity=TRUE,importance=TRUE,na.action = na.omit)
+# rf1.pred <- predict(rf1,dat[tt==1,-24])
+# table(observed=dat[tt==1,"hypothyroid"],predicted=rf1.pred)
+# library(party)
+# 
+# rf2 <- cforest(hypothyroid ~ ., data=dat_imp[tt==1,], controls=cforest_unbiased())
+# table(predict(rf2), dat_imp[tt==1,"hypothyroid"])
+
+
+plot(rf)
+print(rf)
+varImpPlot(rf)
+print(rf)
+rf.pred <- predict(rf,dat_imp[tt==1,])
+plot(margin(rf, tat[tt==2,"hypothyroid"]))
