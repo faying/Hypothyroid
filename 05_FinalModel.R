@@ -1,4 +1,4 @@
-dat_orginal <- dat <- read.csv("Data/hypothyroid_1220.csv")
+dat_orginal <- dat <- read.csv("Data/hypothyroid_1220.csv",na.strings = "")
 
 # dat$hypothyroid <- factor(dat$hypothyroid, levels=c(0,1), labels=c("FALSE","TRUE"))
 dat$hypothyroid <- factor(dat$hypothyroid)
@@ -42,11 +42,11 @@ library(ggplot2)
 
 
 tt <- sample(2,nrow(dat_imp),replace=TRUE,prob=c(0.9,0.1))
-core <- detectCores()
-registerDoMC(core)
+# core <- detectCores()
+# registerDoMC(core)
 # rf <- foreach(ntree=rep(ceiling(800/core), core), .combine=combine, .packages='randomForest') %dopar%
 #   randomForest(hypothyroid ~ .,data=dat_imp[tt==1,],nPerm=10,mtry=17,proximity=TRUE,importance=TRUE, ntree=ntree)
-rf <- randomForest(hypothyroid ~.,dat_imp[tt==1,],ntree=800,nPerm=10,mtry=17,proximity=TRUE,importance=TRUE)
+rf <- randomForest(hypothyroid ~.,dat_imp[tt==1,],ntree=1000,nPerm=10,mtry=17,proximity=TRUE,importance=TRUE)
 rn <- round(importance(rf), 2)
 rn[order(rn[,3], decreasing=TRUE),]
 rf.pred <- predict(rf,dat_imp[tt==1,])
@@ -82,16 +82,16 @@ cat(100*round(1-sum(diag(per), na.rm=TRUE), 2))
 cat(100*round(mean(per[,"Error"], na.rm=TRUE), 2))
 
 # Risk Chart: requires the ggplot2 package.
-# Generate a risk chart.
-rf.pr <- predict(rf, newdata=dat_imp[tt==2,], type="prob")[,2]
-eval <- evaluateRisk(rf.pr, dat_imp[tt==2,"hypothyroid"])
-# rf.risk <- riskchart(rf.pr,dat_imp[tt==2,"hypothyroid"], 
+# # Generate a risk chart.
+# rf.pr <- predict(rf, newdata=dat_imp[tt==2,], type="prob")[,2]
+# eval <- evaluateRisk(rf.pr, dat_imp[tt==2,"hypothyroid"])
+# # rf.risk <- riskchart(rf.pr,dat_imp[tt==2,"hypothyroid"], 
 #                 title="Performance Chart Random Forest", show.lift=TRUE, show.precision=TRUE, legend.horiz=FALSE)
 
 rf.pre <- prediction(rf.pr, dat_imp[tt==2,"hypothyroid"])
 rf.per <- performance(rf.pre, "lift", "rpp")
 rf.per@x.values[[1]] <- rf.per@x.values[[1]]*100
-lift.rf <- data.frame(caseload=unlist(per.rf@x.values), lift=unlist(per.rf@y.values))
+lift.rf <- data.frame(caseload=unlist(rf.per@x.values), lift=unlist(rf.per@y.values))
 # Plot the lift chart.
 ROCR::plot(rf.per, col="#CC0000FF", lty=1, xlab="Caseload (%)", add=FALSE)
 legend("topright", c("RandomForest"), col=rainbow(1, 1, .8), lty=1:1, title="Models", inset=c(0.05, 0.05))
@@ -105,7 +105,6 @@ rf.pr <- predict(rf, newdata=dat_imp[tt==2,], type="prob")[,2]
 rf.pre <- prediction(rf.pr, dat_imp[tt==2,"hypothyroid"])
 pe <- performance(rf.pre, "tpr", "fpr")
 au <- performance(rf.pre, "auc")@y.values[[1]]
-pd_ros_rf <- data.frame(cut=pe_ros_rf@alpha.values[[1]],fpr=unlist(pe_ros_rf@x.values), tpr=unlist(pe_ros_rf@y.values))
 
 pd <- data.frame(cut=pe@alpha.values[[1]],fpr=unlist(pe@x.values), tpr=unlist(pe@y.values))
 best_cut <- pd[which.max(pd$tpr-pd$fpr+1),]
@@ -121,9 +120,6 @@ p <- p + annotate("text", x=0.50, y=0.00, hjust=0, vjust=0, size=4,
 
 print(p)
 
-
-
-
 plot(margin(rf, dat[tt==2,"hypothyroid"]))
 
 
@@ -132,51 +128,6 @@ plot(margin(rf, dat[tt==2,"hypothyroid"]))
 
 
 
-library(plotrix)
-library(randomForest)
-library(AUC)
-
-make.data = function(obs=5000,vars=6,noise.factor = .2,smallGroupFraction=.01) {
-  X = data.frame(replicate(vars,rnorm(obs)))
-  yValue = with(X,sin(X1*pi)+sin(X2*pi*2)+rnorm(obs)*noise.factor)
-  yQuantile = quantile(yValue,c(smallGroupFraction,.5))
-  yClass = apply(sapply(yQuantile,function(x) x<yValue),1,sum)
-  yClass = factor(yClass)
-  print(table(yClass)) #five classes, first class has 1% prevalence only
-  Data=data.frame(X=X,y=yClass)
-}
-
-plot.separation = function(rf,...) {
-  triax.plot(rf$votes,...,col.symbols = c("#FF0000FF",
-                                          "#00FF0010",
-                                          "#0000FF10")[as.numeric(rf$y)])
-}
-
-#make data set where class "0"(red circles) are rare observations
-#Class 0 is somewhat separateble from class "1" and fully separateble from class "2"
-Data = make.data()
-par(mfrow=c(1,1))
-plot(Data[,1:2],main="separation problem: identify rare red circles",
-     col = c("#FF0000FF","#00FF0020","#0000FF20")[as.numeric(Data$y)])
-
-#train default RF and with 10x 30x and 100x upsumpling by stratification
-rf1 = randomForest(y~.,Data,ntree=500, sampsize=5000)
-rf2 = randomForest(y~.,Data,ntree=4000,sampsize=c(50,500,500),strata=Data$y)
-rf3 = randomForest(y~.,Data,ntree=4000,sampsize=c(50,100,100),strata=Data$y)
-rf4 = randomForest(y~.,Data,ntree=4000,sampsize=c(50,50,50)  ,strata=Data$y)
-
-#plot out-of-bag pluralistic predictions(vote fractions).
-par(mfrow=c(2,2),mar=c(4,4,3,3))
-plot.separation(rf1,main="no stratification")
-plot.separation(rf2,main="1:10:10")
-plot.separation(rf3,main="1:5:5")
-plot.separation(rf4,main="1:1:1")
-
-par(mfrow=c(1,1))
-plot(roc(rf1$votes[,1],factor(1 * (rf1$y==0))),main="ROC curves for four models predicting class 0")
-plot(roc(rf2$votes[,1],factor(1 * (rf1$y==0))),col=2,add=T)
-plot(roc(rf3$votes[,1],factor(1 * (rf1$y==0))),col=3,add=T)
-plot(roc(rf4$votes[,1],factor(1 * (rf1$y==0))),col=4,add=T)
 
 
 

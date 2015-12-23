@@ -1,8 +1,9 @@
 library(ggplot2)
 library(glmnet)
 library(reshape2)
+dat_imp1 <- read.csv("Data/hypothyroid_rfimp.csv")[,-1]
 # 用glmnet包建模
-model <- cv.glmnet(x,Y,family="binomial",type.measure="deviance")
+lasso <- cv.glmnet(as.matrix(dat_imp1[tt==1,2:24]),dat_imp1[tt==1,"hypothyroid"],family="binomial",type.measure="deviance")
 # 绘制CV曲线图，选择最佳lambda值
 plot(model)
 model$lambda.1se
