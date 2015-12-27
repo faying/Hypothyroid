@@ -47,6 +47,7 @@ tt <- sample(2,nrow(dat_imp),replace=TRUE,prob=c(0.9,0.1))
 # rf <- foreach(ntree=rep(ceiling(800/core), core), .combine=combine, .packages='randomForest') %dopar%
 #   randomForest(hypothyroid ~ .,data=dat_imp[tt==1,],nPerm=10,mtry=17,proximity=TRUE,importance=TRUE, ntree=ntree)
 rf <- randomForest(hypothyroid ~.,dat_imp[tt==1,],ntree=1000,nPerm=10,mtry=17,proximity=TRUE,importance=TRUE)
+print(rf)
 rn <- round(importance(rf), 2)
 rn[order(rn[,3], decreasing=TRUE),]
 rf.pred <- predict(rf,dat_imp[tt==1,])

@@ -114,3 +114,95 @@ table(dat$hypothyroid)
 # 1867  144 
 rm(tmp)
 table(dat_orginal$hypothyroid)
+
+# library(dplyr)
+# pr <- function(x){
+#   (round(prop.table(table(x))*100,2))
+# }
+# 
+# 
+# num <- function(x){
+#     
+# }
+# 
+# pr(na.omit(dat$sex))
+# pr(na.omit(filter(dat,hypothyroid==FALSE)$sex))
+# pr(na.omit(filter(dat,hypothyroid==TRUE)$sex))
+# chisq.test(cbind(table(na.omit(filter(dat,hypothyroid==FALSE)$sex)),table(na.omit(filter(dat,hypothyroid==TRUE)$sex))))
+# 
+# pr(na.omit(dat$query_on_thyroxine))
+# pr(na.omit(filter(dat,hypothyroid==FALSE)$query_on_thyroxine))
+# pr(na.omit(filter(dat,hypothyroid==TRUE)$query_on_thyroxine))
+# chisq.test(cbind(table(na.omit(filter(dat,hypothyroid==FALSE)$query_on_thyroxine)),
+#                  table(na.omit(filter(dat,hypothyroid==TRUE)$query_on_thyroxine))))
+
+
+library(dplyr) # Provides select().
+library(ggplot2) # Provides ggplot(), aes(), geom_density(), xlab(), ggtitle(), labs().
+library(gridExtra) # Provides grid.arrange().
+
+# Generate the plot.
+
+p01 <- dat_imp %>%
+  with(dat_imp) %>%
+  select(age, hypothyroid) %>%
+  ggplot(aes(x=age)) +
+  geom_density(lty=3) +
+  geom_density(aes(fill=hypothyroid, colour=hypothyroid), alpha=0.55) +
+  ggtitle("Distribution of age by hypothyroid") +
+  labs(fill="hypothyroid", y="Density")
+p02 <- dat_imp %>%
+  with(dat_imp) %>%
+  select(TSH, hypothyroid) %>%
+  ggplot(aes(x=TSH)) +
+  geom_density(lty=3) +
+  geom_density(aes(fill=hypothyroid, colour=hypothyroid), alpha=0.55) +
+  ggtitle("Distribution of TSH by hypothyroid") +
+  labs(fill="hypothyroid", y="Density")
+p03 <- dat_imp %>%
+  with(dat_imp) %>%
+  select(T3, hypothyroid) %>%
+  ggplot(aes(x=T3)) +
+  geom_density(lty=3) +
+  geom_density(aes(fill=hypothyroid, colour=hypothyroid), alpha=0.55) +
+  ggtitle("Distribution of T3 by hypothyroid") +
+  labs(fill="hypothyroid", y="Density")
+p04 <- dat_imp %>%
+  with(dat_imp) %>%
+  select(TT4, hypothyroid) %>%
+  ggplot(aes(TT4)) +
+  geom_density(lty=3) +
+  geom_density(aes(fill=hypothyroid, colour=hypothyroid), alpha=0.55) +
+  ggtitle("Distribution of TT4 by hypothyroid") +
+  labs(fill="hypothyroid", y="Density")
+p05 <- dat_imp %>%
+  with(dat_imp) %>%
+  select(T4U, hypothyroid) %>%
+  ggplot(aes(T4U)) +
+  geom_density(lty=3) +
+  geom_density(aes(fill=hypothyroid, colour=hypothyroid), alpha=0.55) +
+  ggtitle("Distribution of T4U by hypothyroid") +
+  labs(fill="hypothyroid", y="Density")
+p06 <- dat_imp %>%
+  with(dat_imp) %>%
+  select(FTI, hypothyroid) %>%
+  ggplot(aes(FTI)) +
+  geom_density(lty=3) +
+  geom_density(aes(fill=hypothyroid, colour=hypothyroid), alpha=0.55) +
+  ggtitle("Distribution of FTI by hypothyroid") +
+  labs(fill="hypothyroid", y="Density")
+p07 <- dat_imp %>%
+  with(dat_imp) %>%
+  select(TBG, hypothyroid) %>%
+  ggplot(aes(TBG)) +
+  geom_density(lty=3) +
+  geom_density(aes(fill=hypothyroid, colour=hypothyroid), alpha=0.55) +
+  ggtitle("Distribution of TBG by hypothyroid") +
+  labs(fill="hypothyroid", y="Density")
+
+
+
+
+
+grid.arrange(p01,p02,p03,p04,p05,p06,p07,ncol=2)
+
